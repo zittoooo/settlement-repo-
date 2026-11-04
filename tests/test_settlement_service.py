@@ -17,6 +17,7 @@ from settlement.services.settlement_service import SettlementService
 
 # ── 공통 픽스처 ──────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def service() -> SettlementService:
     """테스트마다 깨끗한 서비스 인스턴스 (인메모리 저장소 초기화)"""
@@ -32,6 +33,7 @@ def june_period():
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 1. list_settlements() — merchant_id + status 동시 필터
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 class TestListSettlementsCombinedFilter:
 
@@ -56,9 +58,7 @@ class TestListSettlementsCombinedFilter:
     def test_merchant_and_completed_status(self, populated):
         service, records = populated
 
-        result = service.list_settlements(
-            merchant_id="M-001", status=SettlementStatus.COMPLETED
-        )
+        result = service.list_settlements(merchant_id="M-001", status=SettlementStatus.COMPLETED)
 
         assert len(result) == 1
         assert result[0] is records[("M-001", SettlementStatus.COMPLETED)]
@@ -68,9 +68,7 @@ class TestListSettlementsCombinedFilter:
     def test_merchant_and_pending_status(self, populated):
         service, records = populated
 
-        result = service.list_settlements(
-            merchant_id="M-002", status=SettlementStatus.PENDING
-        )
+        result = service.list_settlements(merchant_id="M-002", status=SettlementStatus.PENDING)
 
         assert len(result) == 1
         assert result[0] is records[("M-002", SettlementStatus.PENDING)]
@@ -79,32 +77,25 @@ class TestListSettlementsCombinedFilter:
         """반환된 모든 레코드가 두 조건을 동시에 만족해야 함 (OR가 아니라 AND)"""
         service, _ = populated
 
-        result = service.list_settlements(
-            merchant_id="M-001", status=SettlementStatus.PENDING
-        )
+        result = service.list_settlements(merchant_id="M-001", status=SettlementStatus.PENDING)
 
         assert result  # 비어 있지 않음
         assert all(
-            s.merchant_id == "M-001" and s.status == SettlementStatus.PENDING
-            for s in result
+            s.merchant_id == "M-001" and s.status == SettlementStatus.PENDING for s in result
         )
 
     def test_no_match_when_combination_absent(self, populated):
         """존재하는 판매자라도 해당 상태 레코드가 없으면 빈 리스트"""
         service, _ = populated
 
-        result = service.list_settlements(
-            merchant_id="M-001", status=SettlementStatus.FAILED
-        )
+        result = service.list_settlements(merchant_id="M-001", status=SettlementStatus.FAILED)
 
         assert result == []
 
     def test_unknown_merchant_with_status(self, populated):
         service, _ = populated
 
-        result = service.list_settlements(
-            merchant_id="M-999", status=SettlementStatus.COMPLETED
-        )
+        result = service.list_settlements(merchant_id="M-999", status=SettlementStatus.COMPLETED)
 
         assert result == []
 
@@ -112,6 +103,7 @@ class TestListSettlementsCombinedFilter:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 2. process_settlement() — 없는 ID 조회 시 None 반환
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 class TestProcessSettlementNotFound:
 
@@ -137,6 +129,7 @@ class TestProcessSettlementNotFound:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 3. calculate_settlement() — 빈 기간 (주문 0건)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 class TestCalculateSettlementEmptyPeriod:
 
@@ -192,20 +185,22 @@ class TestCalculateSettlementEmptyPeriod:
         start, end = june_period
         cases = [
             ("ORD-BEFORE", "M-001", OrderStatus.COMPLETED, datetime(2026, 5, 31, 23, 59, 59)),
-            ("ORD-AFTER",  "M-001", OrderStatus.COMPLETED, datetime(2026, 7, 1, 0, 0, 0)),
-            ("ORD-OTHER",  "M-002", OrderStatus.COMPLETED, datetime(2026, 6, 15, 12, 0, 0)),
-            ("ORD-PEND",   "M-001", OrderStatus.PENDING,   datetime(2026, 6, 15, 12, 0, 0)),
+            ("ORD-AFTER", "M-001", OrderStatus.COMPLETED, datetime(2026, 7, 1, 0, 0, 0)),
+            ("ORD-OTHER", "M-002", OrderStatus.COMPLETED, datetime(2026, 6, 15, 12, 0, 0)),
+            ("ORD-PEND", "M-001", OrderStatus.PENDING, datetime(2026, 6, 15, 12, 0, 0)),
             ("ORD-CANCEL", "M-001", OrderStatus.CANCELLED, datetime(2026, 6, 15, 12, 0, 0)),
         ]
         for order_id, merchant, status, completed_at in cases:
-            service.add_order(Order(
-                order_id=order_id,
-                merchant_id=merchant,
-                customer_id="C-001",
-                amount=Decimal("100000"),
-                status=status,
-                completed_at=completed_at,
-            ))
+            service.add_order(
+                Order(
+                    order_id=order_id,
+                    merchant_id=merchant,
+                    customer_id="C-001",
+                    amount=Decimal("100000"),
+                    status=status,
+                    completed_at=completed_at,
+                )
+            )
 
         record = service.calculate_settlement("M-001", start, end)
 
