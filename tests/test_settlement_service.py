@@ -15,7 +15,6 @@ import pytest
 from settlement.models.models import Order, OrderStatus, SettlementStatus
 from settlement.services.settlement_service import SettlementService
 
-
 # ── 공통 픽스처 ──────────────────────────────────────────────────────
 
 @pytest.fixture
