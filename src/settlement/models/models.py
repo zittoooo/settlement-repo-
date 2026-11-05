@@ -4,7 +4,7 @@
 """
 
 from datetime import datetime
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 from enum import Enum
 from typing import Optional
 
@@ -62,8 +62,8 @@ class Order(BaseModel):
 
     @property
     def fee_amount(self) -> Decimal:
-        """수수료 = 주문금액 × 적용 수수료율 (원 단위 반올림)"""
-        return (self.amount * self.applied_fee_rate).quantize(Decimal("1"))
+        """수수료 = 주문금액 × 적용 수수료율 (원 단위 절사)"""
+        return (self.amount * self.applied_fee_rate).quantize(Decimal("1"), rounding=ROUND_DOWN)
 
     @property
     def net_amount(self) -> Decimal:
